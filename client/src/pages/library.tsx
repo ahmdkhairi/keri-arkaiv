@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Album } from "@shared/schema";
 import { Input } from "@/components/ui/input";
-import { Search, Moon, Sun, AlertCircle, Settings } from "lucide-react";
+import { Search, Moon, Sun, AlertCircle, Settings, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
 import { Link } from "wouter";
@@ -47,6 +47,16 @@ export default function Library() {
               My CD Collection
             </h1>
             <div className="flex items-center gap-2">
+              <Link href="/playlists">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full"
+                  data-testid="button-playlists"
+                >
+                  <List className="w-5 h-5" />
+                </Button>
+              </Link>
               <Link href="/admin">
                 <Button
                   size="icon"

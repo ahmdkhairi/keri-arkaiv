@@ -8,6 +8,8 @@ import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
 import Library from "@/pages/library";
 import Admin from "@/pages/admin";
+import Playlists from "@/pages/playlists";
+import PlaylistDetail from "@/pages/playlist-detail";
 
 function Router() {
   return (
@@ -15,6 +17,8 @@ function Router() {
       <Route path="/" component={Welcome} />
       <Route path="/library" component={Library} />
       <Route path="/admin" component={Admin} />
+      <Route path="/playlists" component={Playlists} />
+      <Route path="/playlists/:id" component={PlaylistDetail} />
       <Route component={NotFound} />
     </Switch>
   );

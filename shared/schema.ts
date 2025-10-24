@@ -47,3 +47,25 @@ export function getTotalDuration(tracks: Track[]): string {
 export function formatDuration(duration: string): string {
   return duration;
 }
+
+// Playlist track reference - points to a track in an album
+export const playlistTrackSchema = z.object({
+  albumId: z.string(),
+  trackIndex: z.number(),
+});
+
+export type PlaylistTrack = z.infer<typeof playlistTrackSchema>;
+
+// Playlist schema - collection of tracks from various albums
+export const playlistSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  tracks: z.array(playlistTrackSchema),
+  createdAt: z.date(),
+});
+
+export const insertPlaylistSchema = playlistSchema.omit({ _id: true, createdAt: true });
+
+export type Playlist = z.infer<typeof playlistSchema>;
+export type InsertPlaylist = z.infer<typeof insertPlaylistSchema>;
