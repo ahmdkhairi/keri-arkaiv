@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Album } from "@shared/schema";
 import { Input } from "@/components/ui/input";
-import { Search, Moon, Sun, AlertCircle } from "lucide-react";
+import { Search, Moon, Sun, AlertCircle, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
+import { Link } from "wouter";
 import AlbumCard from "@/components/album-card";
 import AlbumDetailModal from "@/components/album-detail-modal";
 import AudioPlayer from "@/components/audio-player";
@@ -45,15 +46,27 @@ export default function Library() {
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
               My CD Collection
             </h1>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={toggleTheme}
-              className="rounded-full"
-              data-testid="button-theme-toggle"
-            >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/admin">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full"
+                  data-testid="button-admin"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={toggleTheme}
+                className="rounded-full"
+                data-testid="button-theme-toggle"
+              >
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
 
           {/* Search Bar */}

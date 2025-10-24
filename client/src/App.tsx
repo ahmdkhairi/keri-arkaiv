@@ -7,12 +7,14 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
 import Library from "@/pages/library";
+import Admin from "@/pages/admin";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Welcome} />
       <Route path="/library" component={Library} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

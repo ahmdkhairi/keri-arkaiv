@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { Album } from "./models/Album";
+import { insertAlbumSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/albums - Get all albums
@@ -68,6 +69,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error streaming track:", error);
       res.status(500).json({ error: "Failed to stream track" });
+    }
+  });
+
+  // POST /api/albums - Create new album
+  app.post("/api/albums", async (req, res) => {
+    try {
+      const validatedData = insertAlbumSchema.parse(req.body);
+      const newAlbum = new Album(validatedData);
+      await newAlbum.save();
+      
+      const albumObj = newAlbum.toObject();
+      const transformedAlbum = {
+        ...albumObj,
+        _id: albumObj._id.toString(),
+      };
+      
+      res.status(201).json(transformedAlbum);
+    } catch (error: any) {
+      console.error("Error creating album:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid album data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create album" });
+    }
+  });
+
+  // PUT /api/albums/:id - Update album
+  app.put("/api/albums/:id", async (req, res) => {
+    try {
+      const validatedData = insertAlbumSchema.parse(req.body);
+      const updatedAlbum = await Album.findByIdAndUpdate(
+        req.params.id,
+        validatedData,
+        { new: true, runValidators: true }
+      );
+      
+      if (!updatedAlbum) {
+        return res.status(404).json({ error: "Album not found" });
+      }
+      
+      const albumObj = updatedAlbum.toObject();
+      const transformedAlbum = {
+        ...albumObj,
+        _id: albumObj._id.toString(),
+      };
+      
+      res.json(transformedAlbum);
+    } catch (error: any) {
+      console.error("Error updating album:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid album data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update album" });
+    }
+  });
+
+  // DELETE /api/albums/:id - Delete album
+  app.delete("/api/albums/:id", async (req, res) => {
+    try {
+      const deletedAlbum = await Album.findByIdAndDelete(req.params.id);
+      
+      if (!deletedAlbum) {
+        return res.status(404).json({ error: "Album not found" });
+      }
+      
+      res.json({ message: "Album deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting album:", error);
+      res.status(500).json({ error: "Failed to delete album" });
     }
   });
 
