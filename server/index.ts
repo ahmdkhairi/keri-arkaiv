@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { connectDB } from "./db";
+import { seedDatabase } from "./seed";
 
 const app = express();
 
@@ -47,6 +49,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Try to connect to MongoDB
+  try {
+    await connectDB();
+    await seedDatabase();
+  } catch (error) {
+    log('⚠️  Failed to connect to MongoDB. Please check your MONGODB_URI environment variable.');
+    log('⚠️  The application will start but API endpoints will not work until MongoDB is connected.');
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
