@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Album } from "@shared/schema";
 import { Input } from "@/components/ui/input";
-import { Search, Moon, Sun, AlertCircle, Settings, List } from "lucide-react";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Search, Moon, Sun, AlertCircle, Settings, List, Fuel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
 import { Link } from "wouter";
@@ -13,6 +14,8 @@ import AlbumSkeleton from "@/components/album-skeleton";
 
 export default function Library() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterValue, setFilterValue] = useState<string>("all");
+  const [sortOrder, setSortOrder] = useState<string>("year-desc");
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [currentTrack, setCurrentTrack] = useState<{ albumId: string; trackIndex: number } | null>(null);
   const { theme, toggleTheme } = useTheme();
@@ -21,14 +24,40 @@ export default function Library() {
     queryKey: ["/api/albums"],
   });
 
-  const filteredAlbums = albums.filter((album) => {
+  // Filtering and sorting logic
+  let filteredAlbums = albums.filter((album) => {
     const query = searchQuery.toLowerCase();
-    return (
-      album.title.toLowerCase().includes(query) ||
-      album.artist.toLowerCase().includes(query) ||
-      album.genre.toLowerCase().includes(query)
-    );
+    const titleStr = album.title?.toLowerCase() || "";
+    const artistStr = Array.isArray(album.artist)
+      ? album.artist.join(" ").toLowerCase()
+      : (album.artist?.toLowerCase?.() || "");
+    const genreStr = Array.isArray(album.genre)
+      ? album.genre.join(" ").toLowerCase()
+      : (album.genre?.toLowerCase?.() || "");
+    const originStr = album.country_origin?.toLowerCase() || "";
+
+    const matchesSearch =
+      titleStr.includes(query) ||
+      artistStr.includes(query) ||
+      genreStr.includes(query);
+
+    const [type, value] = filterValue?.split(":") || [];
+    const matchesFilter =
+      !filterValue || filterValue === "all"
+        ? true
+        : type === "origin"
+        ? originStr.includes(value.toLowerCase())
+        : type === "genre"
+        ? genreStr.includes(value.toLowerCase())
+        : true;
+
+    return matchesSearch && matchesFilter;
   });
+  // Apply sorting
+  if (sortOrder === "year-asc") filteredAlbums.sort((a, b) => (a.year || 0) - (b.year || 0));
+  else if (sortOrder === "year-desc") filteredAlbums.sort((a, b) => (b.year || 0) - (a.year || 0));
+  else if (sortOrder === "alpha-asc") filteredAlbums.sort((a, b) => a.title.localeCompare(b.title));
+  else if (sortOrder === "alpha-desc") filteredAlbums.sort((a, b) => b.title.localeCompare(a.title));
 
   const handlePlayTrack = (albumId: string, trackIndex: number) => {
     setCurrentTrack({ albumId, trackIndex });
@@ -44,10 +73,10 @@ export default function Library() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
-              My CD Collection
+              cd-stash
             </h1>
             <div className="flex items-center gap-2">
-              <Link href="/playlists">
+              {/* <Link href="/playlists">
                 <Button
                   size="icon"
                   variant="ghost"
@@ -56,8 +85,8 @@ export default function Library() {
                 >
                   <List className="w-5 h-5" />
                 </Button>
-              </Link>
-              <Link href="/admin">
+              </Link> */}
+              {/* <Link href="/admin">
                 <Button
                   size="icon"
                   variant="ghost"
@@ -66,7 +95,7 @@ export default function Library() {
                 >
                   <Settings className="w-5 h-5" />
                 </Button>
-              </Link>
+              </Link> */}
               <Button
                 size="icon"
                 variant="ghost"
@@ -79,17 +108,46 @@ export default function Library() {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative w-full md:max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by title, artist, or genre..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-14 pl-14 pr-4 text-base rounded-2xl border-2 focus-visible:ring-4 focus-visible:ring-offset-2 transition-all"
-              data-testid="input-search"
-            />
+          {/* Filtering & Sorting Toolbar */}
+          <div className="flex flex-col md:flex-row items-center gap-4 w-full md:max-w-2xl">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search by title, artist..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-14 pl-14 pr-4 text-base rounded-2xl border-2 focus-visible:ring-4 focus-visible:ring-offset-2 transition-all"
+                data-testid="input-search"
+              />
+            </div>
+            <Select onValueChange={(value) => setFilterValue(value)} value={filterValue}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="origin:Malaysia">Origin: Malaysia</SelectItem>
+                <SelectItem value="origin:United States">Origin: USA</SelectItem>
+                <SelectItem value="origin:Canada">Origin: Canada</SelectItem>
+                <SelectItem value="origin:Japan">Origin: Japan</SelectItem>
+                <SelectItem value="genre:Pop">Genre: Pop</SelectItem>
+                <SelectItem value="genre:Rock">Genre: Rock</SelectItem>
+                <SelectItem value="genre:Folk">Genre: Folk</SelectItem>
+                <SelectItem value="genre:Hip Hop">Genre: Hip Hop</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select onValueChange={(value) => setSortOrder(value)} value={sortOrder}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="year-asc">Year ↑</SelectItem>
+                <SelectItem value="year-desc">Year ↓</SelectItem>
+                <SelectItem value="alpha-asc">A–Z</SelectItem>
+                <SelectItem value="alpha-desc">Z–A</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </header>

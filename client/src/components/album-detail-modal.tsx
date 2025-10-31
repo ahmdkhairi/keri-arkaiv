@@ -32,7 +32,7 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
           onClick={onClose}
           data-testid="button-close-modal"
         >
-          <X className="w-6 h-6" />
+          <X className="ml-8 w-10 h-10" />
         </Button>
 
         <div className="p-6 md:p-8">
@@ -54,7 +54,9 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span data-testid="text-year">{album.year}</span>
                   <span>•</span>
-                  <span data-testid="text-genre">{album.genre}</span>
+                  <span data-testid="text-genre">
+                    {Array.isArray(album.genre) ? album.genre.join(", ") : album.genre}
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground" data-testid="text-label">
                   {album.label}
@@ -90,46 +92,27 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
                 )}
               </div>
 
-              {/* Track Listing */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-foreground">Tracks</h3>
-                  <p className="text-sm text-muted-foreground" data-testid="text-track-info">
-                    {album.tracks.length} tracks • {getTotalDuration(album.tracks)}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  {album.tracks.map((track, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg hover-elevate active-elevate-2 group cursor-pointer"
-                      onClick={() => onPlayTrack(album._id, index)}
-                      data-testid={`track-${index}`}
-                    >
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="w-10 h-10 rounded-full flex-shrink-0"
-                          data-testid={`button-play-track-${index}`}
-                        >
-                          <Play className="w-4 h-4 fill-current" />
-                        </Button>
-                        <span className="text-sm text-muted-foreground w-8 flex-shrink-0">
-                          {(index + 1).toString().padStart(2, '0')}
-                        </span>
-                        <span className="text-base text-foreground truncate flex-1" data-testid={`text-track-title-${index}`}>
-                          {track.title}
-                        </span>
-                      </div>
-                      <span className="text-sm text-muted-foreground flex-shrink-0" data-testid={`text-track-duration-${index}`}>
-                        {track.duration}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              {/* Album Details */}
+              <div className="space-y-2 mb-8">
+                <h3 className="text-lg font-semibold mb-3 text-foreground">Details</h3>
+                <p className="text-sm text-muted-foreground" data-testid="text-duration">
+                  <strong>Duration:</strong> {album.duration || "Not Available"}
+                </p>
+                <p className="text-sm text-muted-foreground" data-testid="text-release">
+                  <strong>Release:</strong> {album.release || "Not Available"}
+                </p>
+                <p className="text-sm text-muted-foreground" data-testid="text-format">
+                  <strong>Format:</strong> {album.format || "Not Available"}
+                </p>
+                <p className="text-sm text-muted-foreground" data-testid="text-barcode">
+                  <strong>Barcode:</strong> {album.barcode === "-1" || !album.barcode ? "Not Available" : album.barcode}
+                </p>
+                <p className="text-sm text-muted-foreground" data-testid="text-origin">
+                  <strong>Origin:</strong> {album.country_origin || "Not Available"}
+                </p>
               </div>
+
+              {/* Track listing temporarily removed for display-only mode */}
             </div>
           </div>
         </div>
