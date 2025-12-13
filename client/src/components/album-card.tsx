@@ -28,10 +28,10 @@ export default function AlbumCard({ album, onClick }: AlbumCardProps) {
           {album.title}
         </h3>
         <p className="text-base text-muted-foreground truncate" data-testid={`text-artist-${album._id}`}>
-          {album.artist}
+          {Array.isArray(album.artist) ? album.artist.join(", ") : album.artist}
         </p>
         <p className="text-sm text-muted-foreground/75" data-testid={`text-year-${album._id}`}>
-          {album.year}
+          {album.year} • {album.format}
         </p>
       </div>
     </Card>
