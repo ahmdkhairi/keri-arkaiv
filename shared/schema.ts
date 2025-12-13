@@ -1,15 +1,15 @@
 import { z } from "zod";
 
-// Track schema - individual songs on an album
+// Track schema 
 export const trackSchema = z.object({
   title: z.string(),
-  duration: z.string(), // Format: "3:45"
+  duration: z.string(), 
   file: z.string(), // URL or path to audio file
 });
 
 export type Track = z.infer<typeof trackSchema>;
 
-// Album schema - complete album information
+// Album schema 
 export const albumSchema = z.object({
   _id: z.string(),
   title: z.string(),
@@ -18,7 +18,10 @@ export const albumSchema = z.object({
   genre: z.string(),
   label: z.string(),
   about: z.string(),
-  cover: z.string(), // URL to cover image
+  origin: z.string(),
+  format: z.string(),
+  release: z.string(),
+  cover: z.string(),
   tracks: z.array(trackSchema),
 });
 
@@ -48,7 +51,7 @@ export function formatDuration(duration: string): string {
   return duration;
 }
 
-// Playlist track reference - points to a track in an album
+// Playlist track reference 
 export const playlistTrackSchema = z.object({
   albumId: z.string(),
   trackIndex: z.number(),
@@ -56,7 +59,7 @@ export const playlistTrackSchema = z.object({
 
 export type PlaylistTrack = z.infer<typeof playlistTrackSchema>;
 
-// Playlist schema - collection of tracks from various albums
+// Playlist schema
 export const playlistSchema = z.object({
   _id: z.string(),
   name: z.string(),

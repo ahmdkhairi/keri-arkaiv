@@ -71,7 +71,7 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
                   {album.title}
                 </h2>
                 <p className="text-2xl text-muted-foreground" data-testid="text-artist">
-                  {album.artist}
+                  {Array.isArray(album.artist) ? album.artist.join(", ") : album.artist}
                 </p>
               </div>
 
