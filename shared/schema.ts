@@ -1,10 +1,18 @@
 import { z } from "zod";
 
 // Track schema 
+
 export const trackSchema = z.object({
+  _id: z.string().optional(),           
+  album_id: z.string(),               
+  track_no: z.number(),
   title: z.string(),
-  duration: z.string(), 
-  file: z.string(), // URL or path to audio file
+  duration: z.string().nullable(),     
+  artists: z.array(z.string()).optional(),
+  disc_no: z.number().optional(),        
+  audio_url: z.string().nullable(),      
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 export type Track = z.infer<typeof trackSchema>;
@@ -18,11 +26,12 @@ export const albumSchema = z.object({
   genre: z.string(),
   label: z.string(),
   about: z.string(),
-  origin: z.string(),
+  barcode: z.string(),
+  country_origin: z.string(),
   format: z.string(),
   release: z.string(),
   cover: z.string(),
-  tracks: z.array(trackSchema),
+  duration: z.string(),
 });
 
 export const insertAlbumSchema = albumSchema.omit({ _id: true });

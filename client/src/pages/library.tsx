@@ -47,7 +47,7 @@ export default function Library() {
       filterValue === "all"
         ? true
         : type === "origin"
-        ? album.origin?.toLowerCase().includes(value.toLowerCase())
+        ? album.country_origin?.toLowerCase().includes(value.toLowerCase())
         : type === "genre"
         ? (Array.isArray(album.genre)
             ? album.genre.join(" ").toLowerCase()

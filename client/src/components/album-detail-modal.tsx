@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Album, getTotalDuration } from "@shared/schema";
+import { useEffect, useState } from "react";
+import { Album, Track } from "@shared/schema";
 import { X, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,20 @@ interface AlbumDetailModalProps {
 export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumDetailModalProps) {
   const [showFullAbout, setShowFullAbout] = useState(false);
   const aboutPreview = album.about.length > 200 ? album.about.slice(0, 200) + "..." : album.about;
+ const [tracks, setTracks] = useState<Track[]>([]);
+const [loadingTracks, setLoadingTracks] = useState(false);
 
+useEffect(() => {
+  if (!album._id) return;
+
+  setLoadingTracks(true);
+
+  fetch(`/api/albums/${album._id}/tracks`)
+    .then((res) => res.json())
+    .then((data) => setTracks(data))
+    .finally(() => setLoadingTracks(false));
+}, [album._id]);
+ 
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
@@ -21,7 +34,7 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
       data-testid="modal-album-detail"
     >
       <Card 
-        className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -65,6 +78,7 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
             </div>
 
             {/* Right Column - Album Info */}
+            <div className="flex flex-col max-h-[75vh] overflow-y-auto pr-4 custom-scroll">
             <div className="flex flex-col">
               <div className="mb-6">
                 <h2 className="text-4xl font-serif font-bold mb-2 text-foreground" data-testid="text-album-title">
@@ -112,7 +126,53 @@ export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumD
                 </p>
               </div>
 
-              {/* Track listing temporarily removed for display-only mode */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3 text-foreground">
+                Tracklist
+              </h3>
+
+              {loadingTracks && (
+                <p className="text-sm text-muted-foreground">Loading tracks…</p>
+              )}
+
+              {!loadingTracks && tracks.length === 0 && (
+                <p className="text-sm text-muted-foreground">No tracks available</p>
+              )}
+
+              <ul className="space-y-2">
+                {tracks.map((track, index) => (
+                  <li
+                    key={track._id}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 text-muted-foreground">
+                        {track.track_no}
+                      </span>
+                      <span>{track.title}</span>
+                    </div>
+
+                    <div className="flex items-center px-5">
+                      <span className="text-muted-foreground">
+                        {track.duration ?? "--:--"}
+                      </span>
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() =>
+                          onPlayTrack(album._id, index)
+                        }
+                      >
+                        <Play className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            </div>
             </div>
           </div>
         </div>
