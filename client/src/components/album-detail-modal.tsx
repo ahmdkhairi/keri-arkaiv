@@ -13,42 +13,78 @@ interface AlbumDetailModalProps {
 export default function AlbumDetailModal({ album, onClose, onPlayTrack }: AlbumDetailModalProps) {
   const [showFullAbout, setShowFullAbout] = useState(false);
   const aboutPreview = album.about.length > 200 ? album.about.slice(0, 200) + "..." : album.about;
- const [tracks, setTracks] = useState<Track[]>([]);
-const [loadingTracks, setLoadingTracks] = useState(false);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loadingTracks, setLoadingTracks] = useState(false);
 
-useEffect(() => {
-  if (!album._id) return;
+  useEffect(() => {
+    if (!album._id) return;
 
-  setLoadingTracks(true);
+    setLoadingTracks(true);
 
-  fetch(`/api/albums/${album._id}/tracks`)
-    .then((res) => res.json())
-    .then((data) => setTracks(data))
-    .finally(() => setLoadingTracks(false));
-}, [album._id]);
+    fetch(`/api/albums/${album._id}/tracks`)
+      .then((res) => res.json())
+      .then((data) => setTracks(data))
+      .finally(() => setLoadingTracks(false));
+  }, [album._id]);
+
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    const { overflow, position, top, width } = document.body.style;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.position = position;
+      document.body.style.top = top;
+      document.body.style.width = width;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
  
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-2 backdrop-blur-md sm:items-center sm:p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="album-detail-title"
       data-testid="modal-album-detail"
     >
       <Card 
-        className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden"
+        className="relative my-2 flex max-h-[calc(100dvh-1rem)] w-full max-w-5xl flex-col overflow-hidden sm:my-0 sm:max-h-[90dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <Button
           size="icon"
           variant="ghost"
-          className="absolute top-4 right-4 z-10 rounded-full"
+          className="absolute right-4 top-4 z-10 rounded-full"
           onClick={onClose}
+          aria-label="Close album details"
           data-testid="button-close-modal"
         >
-          <X className="ml-8 w-10 h-10" />
+          <X className="w-6 h-6" />
         </Button>
 
-        <div className="p-6 md:p-8">
+        <div className="custom-scroll overflow-y-auto p-6 pb-10 md:p-8">
           {/* Two Column Layout on Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-[40%_60%] gap-8">
             {/* Left Column - Album Cover */}
@@ -78,10 +114,10 @@ useEffect(() => {
             </div>
 
             {/* Right Column - Album Info */}
-            <div className="flex flex-col max-h-[75vh] overflow-y-auto pr-4 custom-scroll">
-            <div className="flex flex-col">
-              <div className="mb-6">
-                <h2 className="text-4xl font-serif font-bold mb-2 text-foreground" data-testid="text-album-title">
+            <div className="flex flex-col md:max-h-[75vh] md:overflow-y-auto md:pr-4 md:custom-scroll">
+            <div className="flex min-w-0 flex-col">
+              <div className="mb-6 pr-12 md:pr-0">
+                <h2 id="album-detail-title" className="text-4xl font-serif font-bold mb-2 text-foreground" data-testid="text-album-title">
                   {album.title}
                 </h2>
                 <p className="text-2xl text-muted-foreground" data-testid="text-artist">
@@ -142,18 +178,18 @@ useEffect(() => {
               <ul className="space-y-2">
                 {tracks.map((track, index) => (
                   <li
-                    key={track._id}
-                    className="flex items-center justify-between text-sm"
+                    key={track._id ?? `${track.track_no}-${track.title}`}
+                    className="flex items-center justify-between gap-3 text-sm"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="w-6 text-muted-foreground">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className="w-6 shrink-0 text-muted-foreground">
                         {track.track_no}
                       </span>
-                      <span>{track.title}</span>
+                      <span className="min-w-0 truncate">{track.title}</span>
                     </div>
 
-                    <div className="flex items-center px-5">
-                      <span className="text-muted-foreground">
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="text-muted-foreground tabular-nums">
                         {track.duration ?? "--:--"}
                       </span>
 
@@ -163,6 +199,7 @@ useEffect(() => {
                         onClick={() =>
                           onPlayTrack(album._id, index)
                         }
+                        aria-label={`Play ${track.title}`}
                       >
                         <Play className="w-4 h-4" />
                       </Button>

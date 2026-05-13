@@ -84,7 +84,7 @@ export default function PlaylistDetail() {
     const query = searchQuery.toLowerCase();
     return (
       album.title.toLowerCase().includes(query) ||
-      album.artist.toLowerCase().includes(query) ||
+      album.artist.join(" ").toLowerCase().includes(query) ||
       album.tracks.some((track) => track.title.toLowerCase().includes(query))
     );
   });

@@ -1,6 +1,6 @@
 import {Router} from "express"
 import {Album} from "../models/Album"
-import Track from "../models/Track"
+import { requireAdmin } from "../middleware/adminAuth";
 
 const router = Router()
 
@@ -25,6 +25,18 @@ router.get("/albums", async(_req,res)=>{
         res.status(500).json({message: "Failed to fetch albums"})
     }
 })
+
+router.get("/", async (_req, res) => {
+  const albums = await Album.find().sort({ year: -1 });
+  res.json(albums);
+});
+
+// ADMIN ONLY
+router.post("/", requireAdmin, async (req, res) => {
+  const album = await Album.create(req.body);
+  res.status(201).json(album);
+});
+
 
 
 export default router;

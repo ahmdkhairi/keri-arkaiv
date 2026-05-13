@@ -11,9 +11,9 @@ const TrackSchema = new Schema<Track>({
 
 const AlbumSchema = new Schema<AlbumDocument>({
   title: { type: String, required: true },
-  artist: { type: String, required: true },
+  artist: { type: [String], required: true },
   year: { type: Number, required: true },
-  genre: { type: String, required: true },
+  genre: { type: [String], required: true },
   label: { type: String, required: true },
   about: { type: String, required: true },
   cover: { type: String, required: true },

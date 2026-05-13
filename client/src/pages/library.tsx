@@ -3,10 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Album } from "@shared/schema";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { Search, Moon, Sun, AlertCircle, Settings, List, Fuel } from "lucide-react";
+import { Search, Moon, Sun, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/theme-context";
-import { Link } from "wouter";
 import AlbumCard from "@/components/album-card";
 import AlbumDetailModal from "@/components/album-detail-modal";
 import AudioPlayer from "@/components/audio-player";
@@ -28,19 +27,13 @@ export default function Library() {
   let filteredAlbums = albums.filter((album) => {
     const query = searchQuery.toLowerCase();
     const titleStr = album.title?.toLowerCase() || "";
-    const artistStr = Array.isArray(album.artist)
-      ? album.artist.join(" ").toLowerCase()
-      : (album.artist?.toLowerCase?.() || "");
-    const genreStr = Array.isArray(album.genre)
-      ? album.genre.join(" ").toLowerCase()
-      : (album.genre?.toLowerCase?.() || "");
-    const originStr = album.origin?.toLowerCase() || "";
+    const artistStr = album.artist.join(" ").toLowerCase();
+    const genreStr = album.genre.join(" ").toLowerCase();
 
     const matchesSearch =
-      titleStr.includes(query) ||
       artistStr.includes(query) ||
+      titleStr.includes(query) ||
       genreStr.includes(query);
-
     const [type, value] = filterValue?.split(":") || [];
 
     const matchesFilter =
@@ -49,10 +42,7 @@ export default function Library() {
         : type === "origin"
         ? album.country_origin?.toLowerCase().includes(value.toLowerCase())
         : type === "genre"
-        ? (Array.isArray(album.genre)
-            ? album.genre.join(" ").toLowerCase()
-            : album.genre?.toLowerCase() || ""
-          ).includes(value.toLowerCase())
+        ? album.genre.join(" ").toLowerCase().includes(value.toLowerCase())
         : type === "format"
         ? album.format?.toLowerCase() === value.toLowerCase()
         : type === "release"

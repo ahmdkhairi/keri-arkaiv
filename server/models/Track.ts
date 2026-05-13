@@ -22,7 +22,7 @@ const TrackSchema = new mongoose.Schema(
 
     duration: {
         type: String,
-        required: true,
+        required: false,
     },
 
     artists: {

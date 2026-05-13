@@ -106,7 +106,10 @@ export default function Admin() {
       label: album.label,
       about: album.about,
       cover: album.cover,
-      tracks: album.tracks,
+      tracks: album.tracks.map((track) => ({
+        ...track,
+        duration: track.duration ?? "",
+      })),
     });
     setShowForm(true);
   };
